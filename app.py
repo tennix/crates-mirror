@@ -85,13 +85,13 @@ def load_info():
 async def download_crate(name, version, checksum):
     filename = name + "-" + version + ".crate"
     if len(name) == 1:
-        directory = os.path.join(crates_path, '1')
+        directory = os.path.join(crates_path, '1', name)
     elif len(name) == 2:
-        directory = os.path.join(crates_path, '2')
+        directory = os.path.join(crates_path, '2', name)
     elif len(name) == 3:
-        directory = os.path.join(crates_path, '3', name[:1])
+        directory = os.path.join(crates_path, '3', name[:1], name)
     else:
-        directory = os.path.join(crates_path, name[:2], name[2:4])
+        directory = os.path.join(crates_path, name[:2], name[2:4], name)
     if not os.path.exists(directory):
         os.makedirs(directory)
     crate_path = os.path.join(directory, filename)
