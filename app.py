@@ -45,7 +45,7 @@ def initialize_db():
                          checksum text,
                          yanked integer default 0,
                          downloaded integer default 0,
-                         last_updated text
+                         last_update text
                      )""")
         c.execute("""create table update_history (
                          commit_id text,
@@ -68,7 +68,7 @@ def initialize_repo():
 def load_info():
     cur = conn.cursor()
     cur.execute("select count(id) from crate")
-    if cur.fetchone():          # info already loaded
+    if cur.fetchone()[0] != 0:          # info already loaded
         return
     for root, dirs, files in os.walk(registry_path):
         for f in files:
@@ -84,7 +84,17 @@ def load_info():
 
 async def download_crate(name, version, checksum):
     filename = name + "-" + version + ".crate"
-    crate_path = os.path.join(crates_path, filename)
+    if len(name) == 1:
+        directory = os.path.join(crates_path, '1')
+    elif len(name) == 2:
+        directory = os.path.join(crates_path, '2')
+    elif len(name) == 3:
+        directory = os.path.join(crates_path, '3', name[:1])
+    else:
+        directory = os.path.join(crates_path, name[:2], name[2:4])
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    crate_path = os.path.join(directory, filename)
     r = requests.get(dl.format(name=name, version=version), proxies=proxies, stream=True)
     with open(crate_path, "wb") as fd: # is chunk needed here?
         for chunk in r.iter_content(chunk_size=chunk_size):
@@ -126,7 +136,7 @@ def get_crate_info(name, version):
     elif len(name) == 3:
         index_path = os.path.join(registry_path, '3', name[:1], name)
     else:
-        index_path = os.path.join(registry.path, name[:2], name[2:4], name)
+        index_path = os.path.join(registry_path, name[:2], name[2:4], name)
     with open(index_path, 'r') as f:
         for line in f.readline():
             crate = json.load(line)
