@@ -95,7 +95,7 @@ async def download_crate(name, version, checksum):
     if not os.path.exists(directory):
         os.makedirs(directory)
     crate_path = os.path.join(directory, filename)
-    r = requests.get(dl.format(name=name, version=version), proxies=proxies, stream=True)
+    r = requests.get(dl.format(name=name, version=version), proxies=proxies, timeout=5, stream=True)
     with open(crate_path, "wb") as fd: # is chunk needed here?
         for chunk in r.iter_content(chunk_size=chunk_size):
             fd.write(chunk)
